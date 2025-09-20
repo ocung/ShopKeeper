@@ -1,16 +1,25 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GamePlayTimeUI : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+
+    [SerializeField] private Slider slider;
+
+    public void SetMaxPlayTime(int time)
     {
-        
+        slider.maxValue = time;
+        slider.value = time;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetPlayTime(int time)
     {
-        
+        slider.value = time;
     }
+
+    public void PrintValue()
+    {
+        Debug.Log("Current Play Time: " + slider.value);
+    }
+
 }

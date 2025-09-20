@@ -7,6 +7,7 @@ public class GameOver : MonoBehaviour
     [SerializeField] private PlayerInventory playerInventory;
     [SerializeField] private PlayerMoney playerMoney;
     [SerializeField] private HagglingSystem hagglingSystem;
+    [SerializeField] private GamePlayTimeUI playTimeUI;
 
     [SerializeField] private int PlayTime;
 
@@ -15,9 +16,18 @@ public class GameOver : MonoBehaviour
         hagglingSystem.OfferingEnded += GameOverCheck;
     }
 
+    void Start()
+    {
+        playTimeUI.SetMaxPlayTime(PlayTime);
+        // playTimeUI.PrintValue();
+
+    }
+
     private void GameOverCheck()
     {
         PlayTime--;
+        //playTimeUI.PrintValue();
+        playTimeUI.SetPlayTime(PlayTime);
         Debug.Log("Remaining Play Time: " + PlayTime);
 
         if (IsOutOfPlayTime())
