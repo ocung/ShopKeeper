@@ -6,6 +6,7 @@ public class Customer : MonoBehaviour
     [SerializeField] private CustomerSpawner spawner;
     [SerializeField] private HagglingSystem hagglingSystem;
     [SerializeField] private PlayerInventory playerInventory;//TestPurpose
+    [SerializeField] private CustomerStateUI stateUI;
 
     public event Action OnBuying, OnSelling, OnHaggling, OnRefusing;
     public event Action OnStartHaggling;
@@ -79,6 +80,26 @@ public class Customer : MonoBehaviour
     public bool isCustomerAcceptingSellOffer(int offerPrice, int itemPriced)
     {
         return offerPrice >= MaxPrice(itemPriced);
+    }
+
+    public void DisplayStateUI()
+    {
+        switch (customerState)
+        {
+            case CustomerState.Buying:
+                stateUI.SetBuying();
+                Debug.Log("DisplayBuying");
+                break;
+            case CustomerState.Selling:
+                stateUI.SetSelling();
+                Debug.Log("DisplaySelling");
+                break;
+        }
+    }
+
+    public void HideStateUI()
+    {
+        stateUI.Hide();
     }
 
     private int MinPrice(int itemPrice)

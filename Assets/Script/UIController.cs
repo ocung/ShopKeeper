@@ -28,6 +28,7 @@ public class UIController : MonoBehaviour
         checkConditionController.HideConditionCheckButtons();
         hagglingSystem.HideHagglingTimer();
         displayedItem.Hide();
+        customer.HideStateUI();
 
     }
 
@@ -38,6 +39,7 @@ public class UIController : MonoBehaviour
         checkConditionController.ShowConditionCheckButtons();
         hagglingSystem.ShowHagglingTimer();
         displayedItem.Show();
+        customer.DisplayStateUI();
     }
 
 }
