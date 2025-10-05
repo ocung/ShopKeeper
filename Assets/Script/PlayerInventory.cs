@@ -5,10 +5,16 @@ public class PlayerInventory : MonoBehaviour
 {
 
     [SerializeField] private int maxStorage = 5;
+    [SerializeField] private PlayerInventoryUI playerInventoryUI;
 
     [SerializeField] private List<SmartPhone> smartPhones = new List<SmartPhone>();
 
     private int index;
+
+    private void Start()
+    {
+        UpdateInventoryUI();
+    }
 
     public SmartPhone GetSmartphone()
     {
@@ -31,6 +37,7 @@ public class PlayerInventory : MonoBehaviour
         if (!StorageIsFull())
         {
             smartPhones.Add(phone);
+            UpdateInventoryUI();
             Debug.Log("Smartphone added to inventory: " + phone.ItemName);
             return;
         }
@@ -40,5 +47,13 @@ public class PlayerInventory : MonoBehaviour
     public void RemoveSmartPhone()
     {
         smartPhones.Remove(smartPhones[index]);
+        UpdateInventoryUI();
     }
+
+    private void UpdateInventoryUI()
+    {
+        playerInventoryUI.SetValueText(smartPhones.Count, maxStorage);
+        Debug.Log($"Inventory Updated: {smartPhones.Count} / {maxStorage}");
+    }
+
 }
