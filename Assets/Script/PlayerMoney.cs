@@ -6,7 +6,7 @@ public class PlayerMoney : MonoBehaviour
     [SerializeField] private TMP_Text moneyDisplay;
     //[SerializeField] private Sprite moneyIcon;
 
-    private int money = 90000000;
+    private int money = 20000000;
 
     void Awake()
     {
@@ -33,6 +33,9 @@ public class PlayerMoney : MonoBehaviour
 
     public bool IsOutOfMoney()
     { return money <= 0; }
+
+    public bool HasEnoughMoney(int amount)
+    { return money >= amount; }
         
 
 }
