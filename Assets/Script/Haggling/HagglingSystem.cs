@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using UnityEditor.U2D.Aseprite;
 using UnityEngine;
 
 public class HagglingSystem : MonoBehaviour
@@ -20,6 +21,7 @@ public class HagglingSystem : MonoBehaviour
     void OnEnable()
     {
         hagglingTimerUI.SetDisplayText(hagglingTimer);
+        //customer.SetPatienty(hagglingTimer);
         customer.OnBuying += HandleBuying;
         customer.OnSelling += HandleSelling; 
         customer.OnHaggling += HandleHaggling;
@@ -32,13 +34,13 @@ public class HagglingSystem : MonoBehaviour
         Debug.Log("Price has been offered!");
         offeredPrice = calculator.GetCalculatorCurrentValue();
 
-        if (!playerMoney.HasEnoughMoney(int.Parse(offeredPrice)))
-        { 
+        // if (!playerMoney.HasEnoughMoney(int.Parse(offeredPrice)))
+        // { 
 
-            Debug.Log("Not enough money to make the offer.");
-            return;
+        //     Debug.Log("Not enough money to make the offer.");
+        //     return;
 
-        }
+        // }
 
         switch (customer.customerState)
             {
@@ -46,6 +48,7 @@ public class HagglingSystem : MonoBehaviour
                     CustomerAcceptedForBuy(offeredPrice);
                     break;
                 case Customer.CustomerState.Selling:
+                    if (!CheckPlayerMoney()) return;
                     CustomerAcceptedForSell(offeredPrice);
                     break;
             }
@@ -84,6 +87,7 @@ public class HagglingSystem : MonoBehaviour
     private void HandleHaggling()
     {
         hagglingTimer--;
+        //customer.SetPatienty(hagglingTimer);
         hagglingTimerUI.SetDisplayText(hagglingTimer);
         Debug.Log("Customer is haggling, remaining time: " + hagglingTimer);
 
@@ -113,6 +117,7 @@ public class HagglingSystem : MonoBehaviour
     private void HandleRefusing()
     {
         hagglingTimer--;
+        //customer.SetPatienty(hagglingTimer);
         hagglingTimerUI.SetDisplayText(hagglingTimer);
         Debug.Log("Customer is haggling, remaining time: " + hagglingTimer);
 
@@ -128,8 +133,19 @@ public class HagglingSystem : MonoBehaviour
     }
 
     private void ResetTimer()
-    { 
-        hagglingTimer = 6; 
+    {
+        hagglingTimer = 6;
+        //customer.SetPatienty(hagglingTimer);
+    }
+    private bool CheckPlayerMoney()
+    {
+        Debug.Log("Checking player money for the offer: " + offeredPrice);
+        if (!playerMoney.HasEnoughMoney(int.Parse(offeredPrice)))
+        {
+            Debug.Log("Not enough money to make the offer.");
+            return false;
+        }
+        return true;
     }
     private void AddMoney(int amount)
     {

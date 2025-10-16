@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90cf5f17909cc924ab2b8000f995ecd2, type: 3}
+  m_Name: CustomerAskLessPrice
+  m_EditorClassIdentifier: 
+  speakerName: Pelanggan
+  dialogueText: bolehkah saya mendapat harga yang lebih rendah
+  choices:
+  - {fileID: 11400000}
+  - {fileID: 11400000, guid: f4f27b344c1c1654182c938c99824b5f, type: 2}
+  - {fileID: 11400000, guid: b410c5a205f555445bae7f264034c30e, type: 2}

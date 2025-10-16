@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Data.SqlTypes;
 using UnityEngine;
 
 public class Customer : MonoBehaviour
@@ -7,7 +9,11 @@ public class Customer : MonoBehaviour
     [SerializeField] private HagglingSystem hagglingSystem;
     [SerializeField] private PlayerInventory playerInventory;//TestPurpose
     [SerializeField] private CustomerStateUI stateUI;
+    [SerializeField] private DialogueTrigger SellDialogueTrigger;
+    [SerializeField] private DialogueTrigger BuyDialogueTrigger;
 
+    [SerializeField] private int patienty = 6;
+    
     public event Action OnBuying, OnSelling, OnHaggling, OnRefusing;
     public event Action OnStartHaggling;
 
@@ -22,12 +28,15 @@ public class Customer : MonoBehaviour
 
     void OnEnable()
     {
+        ResetPatienty();
         spawner.OnCustomerSpawn -= Spawn;
         spawner.OnCustomerDespawn += Despawn;
         hagglingSystem.OfferingEnded += OnHagglingEnd;
 
         GetState();
         Debug.Log("Customer State: " + customerState);//TestPurpose
+
+        DisplayStartDialogue();
     }
 
     private void Start()
@@ -40,14 +49,22 @@ public class Customer : MonoBehaviour
         if (isCustomerAcceptingBuyOffer(offerPrice, itemPriced))
         {
             OnBuying?.Invoke();
+            // BuyDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AcceptPrice);
         }
         else if (Haggling(offerPrice, itemPriced))
         {
             OnHaggling?.Invoke();
+            // BuyDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AskPrice);
         }
         else
         {
             OnRefusing?.Invoke();
+            // if (patienty <= 0)
+            // {
+            //     BuyDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.RefusePrice);
+            //     return;
+            // }
+            // BuyDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AskPrice);
         }
     }
 
@@ -56,14 +73,50 @@ public class Customer : MonoBehaviour
         if (isCustomerAcceptingSellOffer(offerPrice, itemPriced))
         {
             OnSelling?.Invoke();
+            ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AcceptPrice);
+            Debug.Log("Accepting the offer");
+            // SellDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AcceptPrice);
         }
         else if (Haggling(offerPrice, itemPriced))
         {
             OnHaggling?.Invoke();
+            patienty--;
+            if (patienty <= 0)
+            {
+                ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AcceptPrice);
+                Debug.Log("Haggling because patienty 0");
+                return;
+            }
+            ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AskPrice);
+            Debug.Log("Haggling but still patienty left");
+            Debug.Log("Customer is haggling, remaining patienty: " + patienty);
+            // if (patienty <= 0)
+            // {
+            //     SellDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AcceptPrice);
+            //     return;
+            // }
+            // SellDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AskPrice);
         }
         else
         {
             OnRefusing?.Invoke();
+            patienty--;
+            if (patienty <= 0)
+            {
+                ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.RefusePrice);
+                Debug.Log("Refuse because patienty 0");
+                return;
+            }
+            ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AskPrice);
+            Debug.Log("Refuse but still patienty left");
+            Debug.Log("Customer is refusing, remaining patienty: " + patienty);
+            // if (patienty <= 0)
+            // {
+            //     SellDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.RefusePrice);
+            //     // StartCoroutine(DelayRefuseDialogue());
+            //     return;
+            // }
+            // SellDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AskPrice);
         }
     }
 
@@ -80,6 +133,12 @@ public class Customer : MonoBehaviour
     public bool isCustomerAcceptingSellOffer(int offerPrice, int itemPriced)
     {
         return offerPrice >= MaxPrice(itemPriced);
+    }
+
+    public void SetPatienty(int value)
+    {
+        patienty = value;
+        Debug.Log("Customer Patiency: " + patienty);
     }
 
     public void DisplayStateUI()
@@ -139,6 +198,24 @@ public class Customer : MonoBehaviour
         }
     }
 
+    private void DisplayStartDialogue()
+    {
+        switch (customerState)
+        {
+            case CustomerState.Buying:
+                BuyDialogueTrigger.TriggerStartDialogue();
+                break;
+            case CustomerState.Selling:
+                SellDialogueTrigger.TriggerStartDialogue();
+                break;
+        }
+    }
+
+    private void ResetPatienty()
+    {
+        patienty = 6;
+    }
+
     private void Spawn()
     {
         gameObject.SetActive(true);
@@ -148,14 +225,51 @@ public class Customer : MonoBehaviour
 
     private void Despawn()
     {
+        // gameObject.SetActive(false);
+        // Debug.Log("Customer Despawned");
+        StartCoroutine(DelayDespawn());
+        Debug.Log("Despawn Customer Called");
+    }
+
+    private void OnHagglingEnd()
+    {
+        // StartCoroutine(DelayDespawn());
+        spawner.OnHagglingEnd();
+    }
+
+    IEnumerator DelayDespawn()
+    {
+        yield return new WaitForSeconds(3f);
+        //spawner.OnHagglingEnd();
         gameObject.SetActive(false);
         Debug.Log("Customer Despawned");
     }
-    
-    private void OnHagglingEnd()
+
+    private void ShowDialogueNextFrame(DialogueTrigger.DialogueChoice choice)
     {
-        spawner.OnHagglingEnd();
+        StopCoroutine(DelayDialogue(choice));
+        StartCoroutine(DelayDialogue(choice));
     }
+
+    private IEnumerator DelayDialogue(DialogueTrigger.DialogueChoice choice)
+    {
+        yield return null; // tunggu 1 frame
+        SellDialogueTrigger.TriggerChangeDialogue(choice);
+    }
+
+    // IEnumerator DelayRefuseDialogue()
+    // {
+    //     yield return null;
+    //     switch (customerState)
+    //     {
+    //         case CustomerState.Buying:
+    //             BuyDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.RefusePrice);
+    //             break;
+    //         case CustomerState.Selling:
+    //             SellDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.RefusePrice);
+    //             break;
+    //     }
+    // }
 
     void OnDisable()
     {
