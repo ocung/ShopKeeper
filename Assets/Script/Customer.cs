@@ -49,16 +49,38 @@ public class Customer : MonoBehaviour
         if (isCustomerAcceptingBuyOffer(offerPrice, itemPriced))
         {
             OnBuying?.Invoke();
+            ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AcceptPrice);
+            Debug.Log("Accepting the offer");
             // BuyDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AcceptPrice);
         }
         else if (Haggling(offerPrice, itemPriced))
         {
             OnHaggling?.Invoke();
+            patienty--;
+            if (patienty <= 0)
+            {
+                ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AcceptPrice);
+                Debug.Log("Haggling because patienty 0");
+                return;
+            }
+            ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AskPrice);
+            Debug.Log("Haggling but still patienty left");
+            Debug.Log("Customer is haggling, remaining patienty: " + patienty);
             // BuyDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AskPrice);
         }
         else
         {
             OnRefusing?.Invoke();
+            patienty--;
+            if (patienty <= 0)
+            {
+                ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.RefusePrice);
+                Debug.Log("Refuse because patienty 0");
+                return;
+            }
+            ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AskPrice);
+            Debug.Log("Refuse but still patienty left");
+            Debug.Log("Customer is refusing, remaining patienty: " + patienty);
             // if (patienty <= 0)
             // {
             //     BuyDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.RefusePrice);
@@ -254,7 +276,16 @@ public class Customer : MonoBehaviour
     private IEnumerator DelayDialogue(DialogueTrigger.DialogueChoice choice)
     {
         yield return null; // tunggu 1 frame
-        SellDialogueTrigger.TriggerChangeDialogue(choice);
+        switch (customerState)
+        {
+            case CustomerState.Buying:
+                BuyDialogueTrigger.TriggerChangeDialogue(choice);
+                break;
+            case CustomerState.Selling:
+                SellDialogueTrigger.TriggerChangeDialogue(choice);
+                break;
+        }
+        //SellDialogueTrigger.TriggerChangeDialogue(choice);
     }
 
     // IEnumerator DelayRefuseDialogue()

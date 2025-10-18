@@ -1,9 +1,12 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DialogueTrigger : MonoBehaviour
 {
     [SerializeField] private DialogueNodeSO startingNode;
     [SerializeField] private DialogueManager dialogueManager;
+
+    private string tempDialogueText;
 
     // void Start()//test
     // {
@@ -12,7 +15,15 @@ public class DialogueTrigger : MonoBehaviour
 
     public void TriggerStartDialogue()
     {
+        tempDialogueText = startingNode.dialogueText;
+        Debug.Log("temp Dialogue: " + tempDialogueText);
+
+        startingNode.dialogueText = $"{startingNode.dialogueText} heyyo";//test
+        Debug.Log("Triggering start dialogue");
         dialogueManager.StartDialogue(startingNode);
+
+        startingNode.dialogueText = tempDialogueText;//reset test
+        Debug.Log("starting Dialogue after temp: " + startingNode.dialogueText);
     }
 
     public void TriggerChangeDialogue(DialogueChoice choice)
