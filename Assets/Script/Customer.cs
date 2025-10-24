@@ -13,17 +13,25 @@ public class Customer : MonoBehaviour
     [SerializeField] private DialogueTrigger BuyDialogueTrigger;
 
     [SerializeField] private int patienty = 6;
+    private int customerOffer;//test purpose
+    private int offereRate;//test purpose
     
     public event Action OnBuying, OnSelling, OnHaggling, OnRefusing;
     public event Action OnStartHaggling;
 
     public CustomerState customerState;
+    public CustomerType customerType;
     // public CustomerState TestState;//TestPurpose
 
     public enum CustomerState
     {
         Buying,
         Selling
+    }
+    public enum CustomerType
+    {
+        DosntKnowPrice,
+        KnowsPrice
     }
 
     void OnEnable()
@@ -34,7 +42,10 @@ public class Customer : MonoBehaviour
         hagglingSystem.OfferingEnded += OnHagglingEnd;
 
         GetState();
+        customerType = CustomerType.KnowsPrice;//TestPurpose
         Debug.Log("Customer State: " + customerState);//TestPurpose
+
+        ResetOfferRate();
 
         DisplayStartDialogue();
     }
@@ -44,14 +55,16 @@ public class Customer : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    public void Buying(int offerPrice, int itemPriced) 
+    public void Buying(int offerPrice, int itemPriced)
     {
+
+        SetCustomerOffer(itemPriced);//test purpose
+
         if (isCustomerAcceptingBuyOffer(offerPrice, itemPriced))
         {
             OnBuying?.Invoke();
             ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AcceptPrice);
             Debug.Log("Accepting the offer");
-            // BuyDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AcceptPrice);
         }
         else if (Haggling(offerPrice, itemPriced))
         {
@@ -66,7 +79,6 @@ public class Customer : MonoBehaviour
             ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AskPrice);
             Debug.Log("Haggling but still patienty left");
             Debug.Log("Customer is haggling, remaining patienty: " + patienty);
-            // BuyDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AskPrice);
         }
         else
         {
@@ -81,23 +93,19 @@ public class Customer : MonoBehaviour
             ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AskPrice);
             Debug.Log("Refuse but still patienty left");
             Debug.Log("Customer is refusing, remaining patienty: " + patienty);
-            // if (patienty <= 0)
-            // {
-            //     BuyDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.RefusePrice);
-            //     return;
-            // }
-            // BuyDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AskPrice);
         }
     }
 
-    public void Selling(int offerPrice, int itemPriced) 
+    public void Selling(int offerPrice, int itemPriced)
     {
+        
+        SetCustomerOffer(itemPriced);//test purpose
+
         if (isCustomerAcceptingSellOffer(offerPrice, itemPriced))
         {
             OnSelling?.Invoke();
             ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AcceptPrice);
             Debug.Log("Accepting the offer");
-            // SellDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AcceptPrice);
         }
         else if (Haggling(offerPrice, itemPriced))
         {
@@ -112,12 +120,6 @@ public class Customer : MonoBehaviour
             ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AskPrice);
             Debug.Log("Haggling but still patienty left");
             Debug.Log("Customer is haggling, remaining patienty: " + patienty);
-            // if (patienty <= 0)
-            // {
-            //     SellDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AcceptPrice);
-            //     return;
-            // }
-            // SellDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AskPrice);
         }
         else
         {
@@ -132,36 +134,36 @@ public class Customer : MonoBehaviour
             ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AskPrice);
             Debug.Log("Refuse but still patienty left");
             Debug.Log("Customer is refusing, remaining patienty: " + patienty);
-            // if (patienty <= 0)
-            // {
-            //     SellDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.RefusePrice);
-            //     // StartCoroutine(DelayRefuseDialogue());
-            //     return;
-            // }
-            // SellDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.AskPrice);
         }
     }
 
     public bool isCustomerAcceptingBuyOffer(int offerPrice, int itemPriced)
     {
-        return offerPrice <= MinPrice(itemPriced);
+        return offerPrice <= customerOffer;
     }
 
     public bool Haggling(int offerPrice, int itemPriced)
     {
-        return MinPrice(itemPriced) < offerPrice && offerPrice < MaxPrice(itemPriced);
+        switch (customerState)
+        {
+            case CustomerState.Buying:
+                return customerOffer < offerPrice && offerPrice < MaxPrice(itemPriced);
+            case CustomerState.Selling:
+                return MinPrice(itemPriced) < offerPrice && offerPrice < customerOffer;
+        }
+        return false;
     }
 
     public bool isCustomerAcceptingSellOffer(int offerPrice, int itemPriced)
     {
-        return offerPrice >= MaxPrice(itemPriced);
+        return offerPrice >= customerOffer;
     }
 
-    public void SetPatienty(int value)
-    {
-        patienty = value;
-        Debug.Log("Customer Patiency: " + patienty);
-    }
+    // public void SetPatienty(int value)
+    // {
+    //     patienty = value;
+    //     Debug.Log("Customer Patiency: " + patienty);
+    // }
 
     public void DisplayStateUI()
     {
@@ -183,16 +185,73 @@ public class Customer : MonoBehaviour
         stateUI.Hide();
     }
 
+    private void SetOfferRate()
+    {
+        offereRate += UnityEngine.Random.Range(2, 6);
+        Debug.Log("SetUp Offer Rate: " + offereRate);
+    }
+    private void ResetOfferRate()
+    {
+        offereRate = 0;
+        Debug.Log("Reset Offer Rate: " + offereRate);
+    }
+
+    private void SetCustomerOffer(int itemPrice)
+    {
+        SetOfferRate();
+        switch (customerState)
+        {
+            case CustomerState.Buying:
+                customerOffer = MinPrice(itemPrice) * (100 + offereRate) / 100;
+                Debug.Log("Customer Offer for Buying: " + customerOffer);
+                break;
+            case CustomerState.Selling:
+                customerOffer = MaxPrice(itemPrice) * (100 - offereRate) / 100;
+                Debug.Log("Customer Offer for Selling: " + customerOffer);
+                break;
+        }
+    }
+
     private int MinPrice(int itemPrice)
     {
-        int minPrice = itemPrice * 70 / 100;
+        int minPrice;
+        if (customerType == CustomerType.KnowsPrice)
+        {
+            switch (customerState)
+            {
+                case CustomerState.Buying:
+                    minPrice = itemPrice * 70 / 100;
+                    Debug.Log("Known Min Price for Buying: " + minPrice);
+                    return minPrice;
+                case CustomerState.Selling:
+                    minPrice = itemPrice * 110 / 100;
+                    Debug.Log("Known Min Price for Selling: " + minPrice);
+                    return minPrice;
+            }
+        }
+        minPrice = itemPrice * 70 / 100;
         Debug.Log("Min Price: " + minPrice);
         return minPrice;
     }
 
     private int MaxPrice(int itemPrice)
     {
-        int maxPrice = itemPrice * 130 / 100;
+        int maxPrice;
+        if (customerType == CustomerType.KnowsPrice)
+        {
+            switch (customerState)
+            {
+                case CustomerState.Buying:
+                    maxPrice = itemPrice * 110 / 100;
+                    Debug.Log("Known Max Price for Buying: " + maxPrice);
+                    return maxPrice;
+                case CustomerState.Selling:
+                    maxPrice = itemPrice * 130 / 100;
+                    Debug.Log("Known Max Price for Selling: " + maxPrice);
+                    return maxPrice;
+            }
+        }
+        maxPrice = itemPrice * 130 / 100;
         Debug.Log("Max Price: " + maxPrice);
         return maxPrice;
     }
@@ -225,9 +284,11 @@ public class Customer : MonoBehaviour
         switch (customerState)
         {
             case CustomerState.Buying:
+                //BuyDialogueTrigger.TriggerStartDialogue(hagglePrice);
                 BuyDialogueTrigger.TriggerStartDialogue();
                 break;
             case CustomerState.Selling:
+                //SellDialogueTrigger.TriggerStartDialogue(hagglePrice);
                 SellDialogueTrigger.TriggerStartDialogue();
                 break;
         }
@@ -279,28 +340,13 @@ public class Customer : MonoBehaviour
         switch (customerState)
         {
             case CustomerState.Buying:
-                BuyDialogueTrigger.TriggerChangeDialogue(choice);
+                BuyDialogueTrigger.TriggerChangeDialogue(choice, customerOffer);
                 break;
             case CustomerState.Selling:
-                SellDialogueTrigger.TriggerChangeDialogue(choice);
+                SellDialogueTrigger.TriggerChangeDialogue(choice, customerOffer);
                 break;
         }
-        //SellDialogueTrigger.TriggerChangeDialogue(choice);
     }
-
-    // IEnumerator DelayRefuseDialogue()
-    // {
-    //     yield return null;
-    //     switch (customerState)
-    //     {
-    //         case CustomerState.Buying:
-    //             BuyDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.RefusePrice);
-    //             break;
-    //         case CustomerState.Selling:
-    //             SellDialogueTrigger.TriggerChangeDialogue(DialogueTrigger.DialogueChoice.RefusePrice);
-    //             break;
-    //     }
-    // }
 
     void OnDisable()
     {
