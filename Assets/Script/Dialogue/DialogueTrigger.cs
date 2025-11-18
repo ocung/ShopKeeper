@@ -46,7 +46,8 @@ public class DialogueTrigger : MonoBehaviour
                 tempDialogueText = startingNode.choices[(int)DialogueChoice.AskPrice].dialogueText;
                 Debug.Log("temp Dialogue: " + tempDialogueText);
 
-                startingNode.choices[(int)DialogueChoice.AskPrice].dialogueText = $"{startingNode.choices[(int)DialogueChoice.AcceptPrice].dialogueText} {customerOffer}";//test
+                startingNode.choices[(int)DialogueChoice.AskPrice].dialogueText = $"{startingNode.choices[(int)DialogueChoice.AskPrice].dialogueText} {customerOffer}";//test
+                Debug.Log("Modified Dialogue: " + startingNode.choices[(int)DialogueChoice.AskPrice].dialogueText);
                 Debug.Log("Triggering change dialogue: Ask Price");
                 dialogueManager.ChangeNode((int)DialogueChoice.AskPrice);
 

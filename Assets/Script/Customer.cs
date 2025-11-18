@@ -42,8 +42,9 @@ public class Customer : MonoBehaviour
         hagglingSystem.OfferingEnded += OnHagglingEnd;
 
         GetState();
-        customerType = CustomerType.KnowsPrice;//TestPurpose
-        Debug.Log("Customer State: " + customerState);//TestPurpose
+        GetTypee();
+        //customerType = CustomerType.KnowsPrice;//TestPurpose
+        Debug.Log("Customer State: " + customerState);
 
         ResetOfferRate();
 
@@ -224,7 +225,7 @@ public class Customer : MonoBehaviour
                     Debug.Log("Known Min Price for Buying: " + minPrice);
                     return minPrice;
                 case CustomerState.Selling:
-                    minPrice = itemPrice * 110 / 100;
+                    minPrice = itemPrice * 90 / 100;
                     Debug.Log("Known Min Price for Selling: " + minPrice);
                     return minPrice;
             }
@@ -277,6 +278,12 @@ public class Customer : MonoBehaviour
         {
             customerState = GetRandomEnum<CustomerState>();//TestPurpose
         }
+    }
+
+    private void GetTypee()
+    {
+        customerType = GetRandomEnum<CustomerType>();
+        Debug.Log("Customer Type: " + customerType);
     }
 
     private void DisplayStartDialogue()
