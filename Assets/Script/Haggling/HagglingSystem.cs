@@ -22,6 +22,9 @@ public class HagglingSystem : MonoBehaviour
     {
         hagglingTimerUI.SetDisplayText(hagglingTimer);
         //customer.SetPatienty(hagglingTimer);
+
+        customer.OnHighFairness += HandleHighFairness;
+        customer.OnLowFairness += HandleLowFairness;
         customer.OnBuying += HandleBuying;
         customer.OnSelling += HandleSelling; 
         customer.OnHaggling += HandleHaggling;
@@ -66,10 +69,32 @@ public class HagglingSystem : MonoBehaviour
         customer.Selling(int.Parse(offeredPrice), checkCondition.GetItemPrice());
     }
 
+    private void HandleHighFairness()
+    {
+        Debug.Log("Customer perceives the offer as high fairness.");
+        switch (customer.customerState)
+        {
+            case Customer.CustomerState.Buying:
+                HandleBuying();
+                break;
+            case Customer.CustomerState.Selling:
+                HandleSelling();
+                break;
+        }
+    }
+
+    private void HandleLowFairness()
+    {
+        Debug.Log("Customer perceives the offer as low fairness.");
+        ResetTimer();
+        OfferingEnded?.Invoke();
+    }
+
     private void HandleBuying()
     {
         AddMoney(int.Parse(offeredPrice));
         playerInventory.RemoveSmartPhone();//test
+        ResetTimer();
         OfferingEnded?.Invoke();
         Debug.Log("Customer accepted the offer: " + offeredPrice);
         Debug.Log("Haggling ended, despawning customer.");
@@ -79,6 +104,7 @@ public class HagglingSystem : MonoBehaviour
     {
         SubtractMoney(int.Parse(offeredPrice));
         playerInventory.AddSmartPhone(checkCondition.GetDisplayedPhone());
+        ResetTimer();
         OfferingEnded?.Invoke();
         Debug.Log("Customer accepted the offer: " + offeredPrice);
         Debug.Log("Haggling ended, despawning customer.");

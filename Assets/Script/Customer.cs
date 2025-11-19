@@ -13,10 +13,12 @@ public class Customer : MonoBehaviour
     [SerializeField] private DialogueTrigger BuyDialogueTrigger;
 
     [SerializeField] private int patienty = 6;
+    [SerializeField] private float highFairnessThreshold = 0.31f;
+    [SerializeField] private float lowFairnessThreshold = 0.2f;
     private int customerOffer;//test purpose
     private int offereRate;//test purpose
     
-    public event Action OnBuying, OnSelling, OnHaggling, OnRefusing;
+    public event Action OnBuying, OnSelling, OnHaggling, OnRefusing, OnLowFairness, OnHighFairness;
     public event Action OnStartHaggling;
 
     public CustomerState customerState;
@@ -59,8 +61,25 @@ public class Customer : MonoBehaviour
     public void Buying(int offerPrice, int itemPriced)
     {
 
-        SetCustomerOffer(itemPriced);//test purpose
+        SetCustomerOffer(itemPriced);
 
+        float profitShopkeeper = SellProfit(offerPrice, itemPriced); //test purpose
+        float profitCustomer = BuyProfit(offerPrice, itemPriced); //test purpose
+        Debug.Log("Profit Shopkeeper: " + profitShopkeeper );
+        Debug.Log("Profit Customer: " + profitCustomer );
+
+        if (CalculateFairness(profitShopkeeper, profitCustomer) >= highFairnessThreshold)
+        {
+            OnHighFairness?.Invoke();
+            Debug.Log("High Fairness - Customer is more likely to accept the offer.");
+            return;   
+        }
+        if (CalculateFairness(profitShopkeeper, profitCustomer) <= lowFairnessThreshold)
+        {
+            OnLowFairness?.Invoke();
+            Debug.Log("Low Fairness - Customer is more likely to refuse the offer.");
+            return;   
+        }
         if (isCustomerAcceptingBuyOffer(offerPrice, itemPriced))
         {
             OnBuying?.Invoke();
@@ -100,7 +119,25 @@ public class Customer : MonoBehaviour
     public void Selling(int offerPrice, int itemPriced)
     {
         
-        SetCustomerOffer(itemPriced);//test purpose
+        SetCustomerOffer(itemPriced);
+
+        float profitShopkeeper = BuyProfit(offerPrice, itemPriced); //test purpose
+        float profitCustomer = SellProfit(offerPrice, itemPriced); //test purpose
+        Debug.Log("Profit Shopkeeper: " + profitShopkeeper );
+        Debug.Log("Profit Customer: " + profitCustomer );
+
+        if (CalculateFairness(profitShopkeeper, profitCustomer) >= highFairnessThreshold)
+        {
+            OnHighFairness?.Invoke();
+            Debug.Log("High Fairness - Customer is more likely to accept the offer.");
+            return;   
+        }
+        if (CalculateFairness(profitShopkeeper, profitCustomer) <= lowFairnessThreshold)
+        {
+            OnLowFairness?.Invoke();
+            Debug.Log("Low Fairness - Customer is more likely to refuse the offer.");
+            return;   
+        }
 
         if (isCustomerAcceptingSellOffer(offerPrice, itemPriced))
         {
@@ -211,6 +248,43 @@ public class Customer : MonoBehaviour
                 Debug.Log("Customer Offer for Selling: " + customerOffer);
                 break;
         }
+    }
+
+    private float BuyProfit (int offer, int refPrice) // offer = priice shopkeeper gives to customer, ref_price = price of item
+    {
+        float profit = (refPrice - offer) / (float)offer;
+        Debug.Log("Buy Profit: " + profit);
+        return profit;
+    }
+    
+    private float SellProfit (int offer, int refPrice) // offer = price shopkeeper give from customer, ref_price = price of item
+    {
+        float profit = (offer - refPrice) / (float)refPrice;
+        Debug.Log("Sell Profit: " + profit);
+        return profit;
+    }
+
+    private float CalculateInequality (float profitShopkeeper, float profitCustomer)
+    {
+        float absProfitCustomer = Math.Abs(profitCustomer);
+        float absInequality = Math.Abs(profitShopkeeper - profitCustomer);
+
+        if (absProfitCustomer == 0)
+        {
+            Debug.Log("Absolute Profit Customer is " + absInequality);
+            return absInequality;
+        }
+        
+        float inequality = absInequality / absProfitCustomer;
+        Debug.Log("Inequality is " + inequality);
+        return inequality;
+    }
+
+    private float CalculateFairness (float profitShopkeeper, float profitCustomer)
+    {
+        float fairness = 1 / (1 + CalculateInequality(profitShopkeeper, profitCustomer));
+        Debug.Log("Fairness is " + fairness);
+        return fairness;
     }
 
     private int MinPrice(int itemPrice)
