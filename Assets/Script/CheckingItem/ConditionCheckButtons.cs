@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ConditionCheckButtons : MonoBehaviour
 {
 
+    [SerializeField] private Sprite checkIcon; //test purpose
     [SerializeField] private ButtonClicked buttonItemPrefab;
     [SerializeField] private RectTransform CheckCondition;
 
@@ -22,7 +24,10 @@ public class ConditionCheckButtons : MonoBehaviour
             int index = i;
 
             ButtonText Number = button.GetComponentInChildren<ButtonText>();
-            Number.SetText(buttonValue[index]);
+            //Number.SetText(buttonValue[index]);
+
+            Image image = button.GetComponent<Image>();
+            image.sprite = checkIcon;
 
             button.OnRightButtonClicked += () => onInput(buttonValue[index]);
             button.OnLeftButtonClicked += () => onInput(buttonValue[index]);

@@ -37,14 +37,6 @@ public class HagglingSystem : MonoBehaviour
         Debug.Log("Price has been offered!");
         offeredPrice = calculator.GetCalculatorCurrentValue();
 
-        // if (!playerMoney.HasEnoughMoney(int.Parse(offeredPrice)))
-        // { 
-
-        //     Debug.Log("Not enough money to make the offer.");
-        //     return;
-
-        // }
-
         switch (customer.customerState)
             {
                 case Customer.CustomerState.Buying:

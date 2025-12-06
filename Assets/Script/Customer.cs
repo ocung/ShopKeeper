@@ -68,18 +68,11 @@ public class Customer : MonoBehaviour
         Debug.Log("Profit Shopkeeper: " + profitShopkeeper );
         Debug.Log("Profit Customer: " + profitCustomer );
 
-        if (CalculateFairness(profitShopkeeper, profitCustomer) >= highFairnessThreshold)
+        if (isFairOrNot(profitShopkeeper, profitCustomer))
         {
-            OnHighFairness?.Invoke();
-            Debug.Log("High Fairness - Customer is more likely to accept the offer.");
-            return;   
+            return;
         }
-        if (CalculateFairness(profitShopkeeper, profitCustomer) <= lowFairnessThreshold)
-        {
-            OnLowFairness?.Invoke();
-            Debug.Log("Low Fairness - Customer is more likely to refuse the offer.");
-            return;   
-        }
+
         if (isCustomerAcceptingBuyOffer(offerPrice, itemPriced))
         {
             OnBuying?.Invoke();
@@ -126,17 +119,9 @@ public class Customer : MonoBehaviour
         Debug.Log("Profit Shopkeeper: " + profitShopkeeper );
         Debug.Log("Profit Customer: " + profitCustomer );
 
-        if (CalculateFairness(profitShopkeeper, profitCustomer) >= highFairnessThreshold)
+        if (isFairOrNot(profitShopkeeper, profitCustomer))
         {
-            OnHighFairness?.Invoke();
-            Debug.Log("High Fairness - Customer is more likely to accept the offer.");
-            return;   
-        }
-        if (CalculateFairness(profitShopkeeper, profitCustomer) <= lowFairnessThreshold)
-        {
-            OnLowFairness?.Invoke();
-            Debug.Log("Low Fairness - Customer is more likely to refuse the offer.");
-            return;   
+            return;
         }
 
         if (isCustomerAcceptingSellOffer(offerPrice, itemPriced))
@@ -285,6 +270,23 @@ public class Customer : MonoBehaviour
         float fairness = 1 / (1 + CalculateInequality(profitShopkeeper, profitCustomer));
         Debug.Log("Fairness is " + fairness);
         return fairness;
+    }
+
+    private bool isFairOrNot(float profitShopkeeper, float profitCustomer)
+    {
+        if (CalculateFairness(profitShopkeeper, profitCustomer) >= highFairnessThreshold)
+        {
+            OnHighFairness?.Invoke();
+            Debug.Log("High Fairness - Customer is more likely to accept the offer.");
+            return true;   
+        }
+        if (CalculateFairness(profitShopkeeper, profitCustomer) <= lowFairnessThreshold)
+        {
+            OnLowFairness?.Invoke();
+            Debug.Log("Low Fairness - Customer is more likely to refuse the offer.");
+            return true;   
+        }
+        return false;
     }
 
     private int MinPrice(int itemPrice)
