@@ -1,3 +1,4 @@
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 
@@ -16,7 +17,7 @@ public class PlayerMoney : MonoBehaviour
 
     private void SetMoney(int amount)
     {
-        moneyDisplay.text = amount.ToString();
+        moneyDisplay.text = amount.ToString("N0", new CultureInfo("id-ID"));
     }
 
     public void AddMoney(int amount)

@@ -278,12 +278,16 @@ public class Customer : MonoBehaviour
         {
             OnHighFairness?.Invoke();
             Debug.Log("High Fairness - Customer is more likely to accept the offer.");
+
+            ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.AcceptPrice);
             return true;   
         }
         if (CalculateFairness(profitShopkeeper, profitCustomer) <= lowFairnessThreshold)
         {
             OnLowFairness?.Invoke();
             Debug.Log("Low Fairness - Customer is more likely to refuse the offer.");
+
+            ShowDialogueNextFrame(DialogueTrigger.DialogueChoice.RefusePrice);
             return true;   
         }
         return false;

@@ -1,3 +1,4 @@
+using System.Globalization;
 using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
@@ -18,10 +19,27 @@ public class CalculatorDisplay : MonoBehaviour
             }
             
             currentInput += inputButton;
-            displayText.text = currentInput;
+            UpdateFormattedDisplay();
+            //displayText.text = currentInput;
         }
 
     }
+
+     private void UpdateFormattedDisplay()
+    {
+        if (long.TryParse(currentInput, out long rawNumber))
+        {
+            // format Indonesia ribuan: 1.200.000
+            string formatted = rawNumber.ToString("N0", new CultureInfo("id-ID"));
+            displayText.text = formatted;
+        }
+        else
+        {
+            // fallback (harusnya sih gak terjadi)
+            displayText.text = currentInput;
+        }
+    }
+
     public void ClearDisplay()
     {
         currentInput = "0";
